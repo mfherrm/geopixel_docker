@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  geopixel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: geopixel:latest
+    container_name: geopixel
+    volumes:
+      # Mount a local directory for input images
+      - ./input_images:/app/input_images
+      # Mount a local directory for output visualizations
+      - ./output:/app/GeoPixel/vis_output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    stdin_open: true  # Keep STDIN open
+    tty: true         # Allocate a pseudo-TTY

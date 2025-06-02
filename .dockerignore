@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Scripts
+run_geopixel.sh
+run_geopixel.bat
+
+# Directories
+input_images/
+output/
+
+# Documentation
+README.md
+
+# Python cache
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.pytest_cache/
+**/.coverage
+**/.coverage.*
+**/htmlcov/
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/

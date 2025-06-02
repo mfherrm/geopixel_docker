@@ -1,0 +1,31 @@
+# Input and output directories
+input_images/*
+output/*
+!input_images/.gitkeep
+!output/.gitkeep
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Docker
+.docker/
+
+# Model cache
+.cache/
+.huggingface/
+
+# Logs
+*.log
