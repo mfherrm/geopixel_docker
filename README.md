@@ -1,87 +1,83 @@
-# GeoPixel Docker
+# PyTorch CUDA Docker Container
 
-This repository contains Docker configuration for running [GeoPixel](https://github.com/MBZUAI/GeoPixel), a vision-language model for geospatial image understanding with segmentation capabilities.
+This repository contains a Docker setup for PyTorch with CUDA support, based on the `pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime` image.
 
 ## Prerequisites
 
-- Docker and Docker Compose
-- NVIDIA GPU with CUDA support
-- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed
+- [Docker](https://docs.docker.com/get-docker/)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) (for GPU support)
+- [Docker Compose](https://docs.docker.com/compose/install/) (optional)
 
-## Setup
+## Features
 
-1. Clone this repository:
+- PyTorch 2.3.1
+- CUDA 12.1
+- cuDNN 8
+- Basic development utilities (git, curl, wget)
+
+## Usage Examples
+
+### Running GeoPixel API Server
+
+This repository is configured to run the GeoPixel model as an API server, which allows you to analyze images and get segmentation masks without interactive input. This is particularly useful for running on platforms like RunPod.
+
+To run the GeoPixel API server:
+
+1. The API server will be accessible at http://localhost:5000 with the following endpoints:
+   - `GET /health` - Check if the model is loaded and ready
+   - `POST /process` - Process an image with a query
+
+4. Example of using the API with curl:
    ```bash
-   git clone https://github.com/yourusername/geopixel_docker.git
-   cd geopixel_docker
+   curl -X POST -F "image=@path/to/your/image.jpg" -F "query=Describe this image" http://localhost:5000/process
    ```
 
-2. Create directories for input images and output:
+5. When you're done, stop the container:
    ```bash
-   mkdir -p input_images output
+   docker-compose down
    ```
 
-3. Build the Docker image:
-   ```bash
-   docker-compose build
-   ```
+### Running on RunPod
 
-## Usage
+To run this container on RunPod:
 
-### Quick Start
+1. Create a new pod with the GPU of your choice
+2. Use a custom Docker image by specifying the GitHub repository URL
+3. The API server will automatically start when the pod is ready
+4. You can access the API through the RunPod HTTP endpoints feature
 
-#### Windows
-Simply double-click the `run_geopixel.bat` file to:
-- Create necessary directories
-- Build the Docker image (if needed)
-- Start the GeoPixel container
+Example RunPod HTTP endpoint configuration:
+- Port: 5000
+- Path: /
+- Target Port: 5000
 
-#### Linux/macOS
-Run the shell script:
+This will allow you to send HTTP requests to the GeoPixel API from anywhere.
+
+### Testing Your PyTorch Setup
+
+You can verify your PyTorch CUDA setup with these commands:
+
+### Basic PyTorch Commands
+
+Once inside the container, you can run Python with PyTorch:
+
 ```bash
-./run_geopixel.sh
+python -c "import torch; print(torch.__version__); print('CUDA available:', torch.cuda.is_available())"
 ```
 
-### Manual Usage
-
-1. Place your input images in the `input_images` directory.
-
-2. Run the container:
-   ```bash
-   docker-compose run geopixel
-   ```
-
-3. When prompted:
-   - Enter your query (e.g., "Can you provide a thorough description of this image?")
-   - Enter the image path (e.g., `/app/input_images/your_image.jpg`)
-
-4. The segmentation results will be saved in the `output` directory.
-
-## Example
+To verify GPU access:
 
 ```bash
-# Start the container
-docker-compose run geopixel
-
-# When prompted:
-Please input your query: Can you provide a thorough description of this image? Please output with interleaved segmentation masks for the corresponding phrases.
-Please input the image path: /app/input_images/satellite_image.jpg
+python -c "import torch; print('GPU count:', torch.cuda.device_count()); print('GPU name:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'No GPU')"
 ```
 
-## Notes
+## Customizing
 
-- The model will be downloaded from Hugging Face the first time you run the container.
-- The default model is `MBZUAI/GeoPixel-7B`, which requires approximately 14GB of VRAM.
-- Processed images with segmentation masks will be saved in the `output` directory.
+To install additional Python packages, uncomment and modify the requirements.txt section in the Dockerfile:
 
-## Custom Arguments
-
-You can pass custom arguments to the GeoPixel chat.py script by modifying the command in docker-compose.yml:
-
-```yaml
-command: ["--version", "MBZUAI/GeoPixel-7B", "--vis_save_path", "/app/GeoPixel/vis_output"]
+```dockerfile
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 ```
 
-Available arguments:
-- `--version`: Model version (default: "MBZUAI/GeoPixel-7B")
-- `--vis_save_path`: Path to save visualization outputs (default: "./vis_output")
+Then create a `requirements.txt` file with your desired packages.

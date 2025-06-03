@@ -1,23 +1,20 @@
-version: '3.8'
+version: '3'
 
 services:
-  geopixel:
+  pytorch:
     build:
       context: .
       dockerfile: Dockerfile
-    image: geopixel:latest
-    container_name: geopixel
     volumes:
-      # Mount a local directory for input images
-      - ./input_images:/app/input_images
-      # Mount a local directory for output visualizations
-      - ./output:/app/GeoPixel/vis_output
+      - ./:/app
+    # Uncomment the following lines to use GPU
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: all
               capabilities: [gpu]
-    stdin_open: true  # Keep STDIN open
-    tty: true         # Allocate a pseudo-TTY
+    # Interactive mode
+    stdin_open: true
+    tty: true

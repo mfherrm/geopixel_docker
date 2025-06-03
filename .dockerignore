@@ -2,34 +2,48 @@
 .git
 .gitignore
 
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-
-# Scripts
-run_geopixel.sh
-run_geopixel.bat
-
-# Directories
-input_images/
-output/
-
-# Documentation
-README.md
-
-# Python cache
-**/__pycache__/
-**/*.py[cod]
-**/*$py.class
-**/.pytest_cache/
-**/.coverage
-**/.coverage.*
-**/htmlcov/
-
-# Environment
-.env
-.venv
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
 venv/
 ENV/
+env/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Docker
+.dockerignore
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Local data directories (customize as needed)
+data/
+datasets/
+models/
+logs/
