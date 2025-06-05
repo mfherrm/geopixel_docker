@@ -4,6 +4,7 @@ import base64
 import os
 import sys
 import time
+import numpy as np
 from PIL import Image
 from io import BytesIO
 
@@ -44,7 +45,7 @@ def process_image(image_path, query, api_url, max_retries=3):
         max_retries (int): Maximum number of retry attempts
         
     Returns:
-        dict: The API response
+        tuple: (API response dict, prediction masks if available)
     """
     # Check if the image file exists
     if not os.path.exists(image_path):
@@ -87,7 +88,32 @@ def process_image(image_path, query, api_url, max_retries=3):
             if response.status_code == 200:
                 try:
                     result = response.json()
-                    return result
+                    
+                    # Check if the response contains prediction masks
+                    pred_masks = None
+                    if "pred_masks_base64" in result:
+                        try:
+                            # Convert base64 encoded masks back to numpy arrays
+                            
+                            masks_encoded = result["pred_masks_base64"]
+                            masks = []
+                            
+                            for mask_b64 in masks_encoded:
+                                # Decode base64
+                                mask_data = base64.b64decode(mask_b64)
+                                # Convert to numpy array
+                                mask_img = Image.open(BytesIO(mask_data))
+                                mask_np = np.array(mask_img) > 0  # Convert to boolean mask
+                                masks.append(mask_np)
+                            
+                            if masks:
+                                pred_masks = np.stack(masks)
+                                print(f"Successfully decoded {len(masks)} prediction masks")
+                        except Exception as e:
+                            print(f"Error decoding prediction masks: {str(e)}")
+                    
+                    # Return both the result and the prediction masks
+                    return result, pred_masks
                 except json.JSONDecodeError as e:
                     print(f"Error: Failed to parse JSON response: {str(e)}")
                     print(f"Response text: {response.text[:500]}...")
@@ -118,7 +144,7 @@ def process_image(image_path, query, api_url, max_retries=3):
                 time.sleep(5)
             continue
     
-    return None
+    return None, None
 
 def save_masked_image(base64_image, output_path):
     """
@@ -178,7 +204,7 @@ def main():
     
     # Process the image
     print("\nProcessing image...")
-    result = process_image(image_path, query, api_process_url)
+    result, pred_masks = process_image(image_path, query, api_process_url)
     
     if result:
         # Check for errors in the result
@@ -209,9 +235,34 @@ def main():
         elif "masked_image_path" in result:
             print(f"\nMasked image saved on server at: {result['masked_image_path']}")
         
+        # If we have prediction masks, print information about them
+        if pred_masks is not None:
+            print("\n--- Prediction Masks ---")
+            print(f"Prediction masks available: {pred_masks is not None}")
+            if hasattr(pred_masks, "shape"):
+                print(f"Mask shape: {pred_masks.shape}")
+                print(f"Number of masks: {pred_masks.shape[0]}")
+            
+            # Save individual mask images if desired
+            save_individual_masks = False
+            if save_individual_masks and hasattr(pred_masks, "shape"):
+                print("Saving individual mask images...")
+                for i in range(pred_masks.shape[0]):
+                    mask_path = os.path.join(output_dir, f"mask_{i}_{os.path.basename(image_path)}")
+                    # Convert boolean mask to uint8 for saving
+                    mask_array = (pred_masks[i] * 255).astype(np.uint8)
+                    mask_img = Image.fromarray(mask_array)
+                    mask_img.save(mask_path)
+                    print(f"Saved mask {i} to {mask_path}")
+        
         print("\nProcessing complete!")
+        
+        # Return the prediction masks for potential further processing
+        return result, pred_masks
     else:
         print("\nFailed to process the image. Please check the API server logs for more details.")
+        return None, None
 
 if __name__ == "__main__":
+    # Call main() without unpacking the return value
     main()

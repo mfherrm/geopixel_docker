@@ -31,4 +31,4 @@ EXPOSE 5000
 
 # Command to run when container starts
 # Run the API server by default
-CMD ["python", "GeoPixel/api_server.py"]
+CMD ["python", "api_server.py"]
