@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import torch.nn.functional as F
 from transformers.modeling_outputs import CausalLMOutputWithPast
-from model.IXC.modeling_internlm_xcomposer2 import InternLMXComposer2ForCausalLM
-from model.IXC.modeling_internlm2 import InternLM2Model
-from model.sam2.build_sam import build_sam2_hf
-from model.sam2.utils.transforms import SAM2Transforms
+from .IXC.modeling_internlm_xcomposer2 import InternLMXComposer2ForCausalLM
+from .IXC.modeling_internlm2 import InternLM2Model
+from .sam2.build_sam import build_sam2_hf
+from .sam2.utils.transforms import SAM2Transforms
 from transformers import TextStreamer
 try:
     from transformers.generation.streamers import BaseStreamer

@@ -1,4 +1,4 @@
-# GeoPixel
+# GeoPixel Core Dependencies
 accelerate==0.34.2
 decord==0.6.0
 deepspeed==0.12.3
@@ -15,3 +15,8 @@ sentencepiece==0.1.99
 tensorboard==2.18.0
 transformers==4.33.2
 werkzeug==3.0.1
+
+# Performance Optimization Dependencies
+gunicorn==21.2.0
+pillow==10.0.0
+psutil==5.9.6
